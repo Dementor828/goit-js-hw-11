@@ -1,46 +1,58 @@
 import { getImagesByQuery } from './js/pixabay-api.js';
-import iziToast from "izitoast";
-import SimpleLightbox from "simplelightbox";
+import iziToast from 'izitoast';
 import { clearGallery, createGallery, hideLoader, showLoader } from './js/render-functions.js';
-
 
 const refs = {
   form: document.querySelector('.form'),
   gallery: document.querySelector('.gallery'),
   loader: document.querySelector('.loader'),
-}
+};
 
-const errorMessage = {
-  message: `Sorry, there are no images matching your search query. Please try again!`,
+const noResultsMessage = {
+  message:
+    'Sorry, there are no images matching your search query. Please try again!',
   position: 'topRight',
 };
 
-const lightbox = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
-  captionDelay: 250,
-})
+const emptyQueryMessage = {
+  message: 'Please enter a search query.',
+  position: 'topRight',
+};
 
-refs.form.addEventListener('submit', function(e) {
+const requestErrorMessage = {
+  message: 'Sorry, something went wrong. Please try again later.',
+  position: 'topRight',
+};
+
+refs.form.addEventListener('submit', function (e) {
   e.preventDefault();
-  clearGallery(refs.gallery)
-  showLoader()
+
   const formData = new FormData(refs.form);
-  const query = formData.get('search-text');
-  getImagesByQuery(query)
-    .then(data => handleThen(data))
-    .catch(error => console.log(error))
-    .finally(() => hideLoader())
+  const query = String(formData.get('search-text') ?? '').trim();
 
-});
-
-function handleThen(data) {
-  const hits = data.hits
-
-  if (hits.length === 0) {
-    iziToast.error(errorMessage);
+  if (!query) {
+    iziToast.warning(emptyQueryMessage);
     return;
   }
 
-  createGallery(hits)
-  lightbox.refresh();
+  clearGallery();
+  showLoader();
+
+  getImagesByQuery(query)
+    .then(data => handleThen(data))
+    .catch(() => {
+      iziToast.error(requestErrorMessage);
+    })
+    .finally(() => hideLoader());
+});
+
+function handleThen(data) {
+  const hits = data.hits;
+
+  if (hits.length === 0) {
+    iziToast.error(noResultsMessage);
+    return;
+  }
+
+  createGallery(hits);
 }

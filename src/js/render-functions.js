@@ -1,12 +1,26 @@
+import SimpleLightbox from 'simplelightbox';
+
 const refs = {
   form: document.querySelector('.form'),
   gallery: document.querySelector('.gallery'),
   loader: document.querySelector('.loader'),
+};
+
+let galleryLightbox = null;
+
+function initOrRefreshLightbox() {
+  if (!galleryLightbox) {
+    galleryLightbox = new SimpleLightbox('.gallery a', {
+      captionsData: 'alt',
+      captionDelay: 250,
+    });
+  }
+  galleryLightbox.refresh();
 }
 
-function createGallery(images){
+function createGallery(images) {
   refs.gallery.innerHTML = createMarkup(images);
-
+  initOrRefreshLightbox();
 }
 
 function createMarkup(images){
@@ -45,8 +59,11 @@ function createImageMarkup(image){
   `
 }
 
-function clearGallery(){
+function clearGallery() {
   refs.gallery.innerHTML = '';
+  if (galleryLightbox) {
+    galleryLightbox.refresh();
+  }
 }
 function showLoader(){
   refs.loader.classList.remove('hidden');

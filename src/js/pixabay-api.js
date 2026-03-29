@@ -15,9 +15,7 @@ function getImagesByQuery(query) {
     safesearch: true,
   }
 
-  return axiosInstance.get('/', { params })
-    .then(r => r.data)
-    .catch(e => console.log(e))
+  return axiosInstance.get('/', { params }).then(r => r.data);
 }
 
 export {getImagesByQuery}
